@@ -3,8 +3,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import {sql} from "./config/db.js"
 import rateLimiter from "./middleware/rateLimit.js";
-
 import transactionsRoutes from "./routes/transactionsRoutes.js"
+import job from "./config/corn.js"
 
 dotenv.config()
 
@@ -17,6 +17,12 @@ app.use(cors({
   credentials: true
 }))
 app.use(rateLimiter)
+
+
+if(process.env.NODE_ENV === "production"){
+  job.start()
+  console.log("CRON JOB STARTED")
+}
 
 
 async function initDB() {
@@ -38,6 +44,11 @@ async function initDB() {
     }
     
 }
+
+app.get("/health",(req,res)=>{
+    res.send("Server is running")
+})
+
 
 app.use("/api/transactions",transactionsRoutes)
 
